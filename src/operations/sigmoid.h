@@ -16,6 +16,7 @@ private:
     Matrix dX;
 public:
     Matrix& forward(Matrix &M);
+    Matrix& backward(Matrix &top_diff);
 };
 
 
