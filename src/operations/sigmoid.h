@@ -6,9 +6,16 @@
 #define PROGETTOGPU_SIGMOID_H
 
 
+#include "matrix.h"
+
 class Sigmoid {
-    public:
-        void forward();
+private:
+    Matrix V;
+    Matrix R;
+
+    Matrix dX;
+public:
+    Matrix& forward(Matrix &M);
 };
 
 

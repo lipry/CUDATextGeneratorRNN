@@ -26,10 +26,17 @@ private:
     void allocDevMemory();
 public:
     Matrix(size_t x, size_t y);
+    Matrix() = default;
 
-    void allocate(bool checkAllocation);
+    void allocate();
+    void allocate_size(size_t x, size_t y);
     void cpyHostToDev();
     void cpyDevToHost();
+    size_t getX() const;
+    size_t getY() const;
+    const std::shared_ptr<float> &getHostData() const;
+    const std::shared_ptr<float> &getDevData() const;
+
     float& operator[](const int index);
     const float& operator[](const int index) const;
 };

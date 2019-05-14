@@ -14,16 +14,30 @@ La “Formula” di base
 8. Cancella le memorie
  */
 
-#define N 3
+#define N 4
 
 int main(void) {
     Matrix m = Matrix(N, N);
-    m.allocate(true);
+    //Matrix r;
+    Sigmoid s;
+
+    m.allocate();
 
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++)
-            m[i*N+j] = (float) 8.0f;
+            m[i*N+j] = (float) i+j;
     }
+
+    /*for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            printf("%f ", m[i*N+j]);
+        printf("\n");
+    }
+    printf("\n");*/
+
+    m.cpyHostToDev();
+    m = s.forward(m);
+    m.cpyDevToHost();
 
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++)
