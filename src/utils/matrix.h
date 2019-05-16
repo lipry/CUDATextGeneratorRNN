@@ -34,6 +34,9 @@ public:
     void cpyDevToHost();
     size_t getX() const;
     size_t getY() const;
+
+    void print_matrix();
+
     const std::shared_ptr<float> &getHostData() const;
     const std::shared_ptr<float> &getDevData() const;
 

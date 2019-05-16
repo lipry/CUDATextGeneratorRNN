@@ -2,15 +2,12 @@
 // Created by Fabio Lipreri on 2019-05-14.
 //
 #include <iostream>
-#include "../utils/common.h"
+#include "common.h"
 #include "matrix.h"
 
-Matrix::Matrix(size_t x, size_t y) {
-    this->x = x;
-    this->y = y;
-    this->host_alloc = false;
-    this->dev_alloc = false;
-}
+Matrix::Matrix(size_t x, size_t y) : x(x), y(y), host_alloc(false), dev_alloc(false),
+dev_data(nullptr), host_data(nullptr)
+{}
 
 void Matrix::allocHostMemory() {
     if(!host_alloc){
@@ -64,6 +61,15 @@ size_t Matrix::getX() const {
 
 size_t Matrix::getY() const {
     return y;
+}
+
+void Matrix::print_matrix() {
+    for(int i = 0; i < x; i++){
+        for(int j = 0; j < y; j++)
+            printf("%f ", host_data.get()[i*y+j]);
+        printf("\n");
+    }
+    printf("\n");
 }
 
 const std::shared_ptr<float> &Matrix::getHostData() const {

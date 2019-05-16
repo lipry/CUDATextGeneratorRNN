@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include "sigmoid.h"
-#include "matrix.h"
+#include "../utils/matrix.h"
 #include "../utils/common.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,9 +29,9 @@ __global__ void sigmoidBackward(float* dR, float* V, float *top_diff, int x, int
         dR[index] = sigmoid_derivate(V[index], top_diff[index]);
 }
 
-Matrix& Sigmoid::forward(Matrix &V){
-    this->V = V;
-    R.allocate_size(V.getX(), V.getY());
+Matrix& Sigmoid::forward(Matrix &v){
+    this->V = v;
+    R.allocate_size(v.getX(), v.getY());
 
     dim3 TxB(BLOCK_SIZE);
     dim3 num_blocks((V.getY() * V.getX() + TxB.x - 1) / TxB.x);

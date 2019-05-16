@@ -1,6 +1,8 @@
-#include <stdio.h>
 #include "src/operations/sigmoid.h"
-#include "src/operations/matrix.h"
+#include "src/utils/matrix.h"
+#include "src/operations/add.h"
+#include "src/utils/common.h"
+#include <time.h>
 
 /*
 La “Formula” di base
@@ -17,6 +19,64 @@ La “Formula” di base
 #define N 4
 
 int main(void) {
+    Matrix a = Matrix(N, N);
+    Matrix b = Matrix(N, N);
+    Matrix r;
+
+    Add x;
+
+    srand (time(NULL));
+
+    a.allocate();
+    b.allocate();
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            a[i*N+j] = (float) (rand() % 100);
+    }
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            b[i*N+j] = (float) (rand() % 100);
+    }
+
+    printf("A\n");
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            printf("%f ", a[i*N+j]);
+        printf("\n");
+    }
+    printf("\n");
+
+    printf("B\n");
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            printf("%f ", b[i*N+j]);
+        printf("\n");
+    }
+    printf("\n");
+
+    a.cpyHostToDev();
+    b.cpyHostToDev();
+
+    r = x.forward(a, b);
+    r.cpyDevToHost();
+
+    printf("SOMMA\n");
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            printf("%f ", r[i*N+j]);
+        printf("\n");
+    }
+    printf("\n");
+
+
+
+    cudaDeviceReset();
+    return 0;
+}
+
+void test_sigmoid(){
     Matrix m = Matrix(N, N);
     Matrix top_diff = Matrix(N, N);
     //Matrix r;
@@ -64,7 +124,7 @@ int main(void) {
     printf("\n");
 
     top_diff.cpyHostToDev();
-    m = s.backward(top_diff);
+    m = s.forward(top_diff);
     m.cpyDevToHost();
 
     printf("DOPO BACKWARD\n");
@@ -74,7 +134,4 @@ int main(void) {
         printf("\n");
     }
     printf("\n");
-
-    cudaDeviceReset();
-    return 0;
 }
