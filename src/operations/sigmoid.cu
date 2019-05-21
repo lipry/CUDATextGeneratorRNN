@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 __device__ float sigmoid(float x){
-    return 1.0f / (1 + exp(-x));
+    return 1.0f / (1 + exp(-x)); //TODO: parallelizzare exp
 }
 
 __device__ float sigmoid_derivate(float x, float top_diff){

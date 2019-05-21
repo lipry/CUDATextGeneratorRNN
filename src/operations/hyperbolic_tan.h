@@ -5,8 +5,17 @@
 #ifndef PROGETTOGPU_HYPERBOLIC_TAN_H
 #define PROGETTOGPU_HYPERBOLIC_TAN_H
 
-class hyperbolic_tan {
+#include "../utils/matrix.h"
 
+class Tanh {
+private:
+    Matrix V;
+    Matrix R;
+
+    Matrix dX;
+public:
+    Matrix& forward(Matrix &v);
+    Matrix& backward(Matrix &top_diff);
 };
 
 
