@@ -17,7 +17,7 @@ private:
 
 public:
     Matrix& forward(Matrix& a, Matrix& b);
-    //Matrix& backward(Matrix& top_diff);
+    Matrix& backward(Matrix& top_diff);
 };
 
 

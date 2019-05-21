@@ -23,6 +23,7 @@ Matrix& Add::forward(Matrix& a, Matrix& b){
     return R;
 }
 
-/*Matrix& Add::backward(Matrix& top_diff){
-
-}*/
+Matrix& Add::backward(Matrix& top_diff){
+    this->dX = top_diff;
+    return dX;
+}

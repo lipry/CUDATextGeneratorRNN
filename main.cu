@@ -2,19 +2,7 @@
 #include "src/utils/matrix.h"
 #include "src/operations/add.h"
 #include "src/utils/common.h"
-#include <time.h>
-
-/*
-La “Formula” di base
-1. Setup dei dati su host (CPU-accessible memory)
-2. Alloca memoria per i dati sulla GPU
-3. Copia i dati da host a GPU
-4. Alloca memoria per output su host
-5. Alloca memoria per output su GPU
-6. Lancia il kernel su GPU
-7. Copia output da GPU a host
-8. Cancella le memorie
- */
+#include <math.h>
 
 #define N 4
 
@@ -22,6 +10,7 @@ int main(void) {
     Matrix a = Matrix(N, N);
     Matrix b = Matrix(N, N);
     Matrix r;
+    Matrix dX;
 
     Add x;
 
@@ -62,10 +51,14 @@ int main(void) {
     r = x.forward(a, b);
     r.cpyDevToHost();
 
+    dX = x.backward(a);
+    dX.cpyDevToHost();
+
+
     printf("SOMMA\n");
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++)
-            printf("%f ", r[i*N+j]);
+            printf("%f ", dX[i*N+j]);
         printf("\n");
     }
     printf("\n");
