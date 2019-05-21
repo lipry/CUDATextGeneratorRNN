@@ -8,8 +8,12 @@
 #define N 4
 
 int main(void) {
+    Matrix m = Matrix(N, N);
+    m.allocate();
 
+    randimatrix(m, 5);
 
+    printfmatrix(m, "sperma");
 
     cudaDeviceReset();
     return 0;

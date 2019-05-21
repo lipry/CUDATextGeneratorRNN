@@ -4,6 +4,9 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "matrix.h"
+
+using namespace std;
 
 #ifndef PROGETTOGPU_COMMON_H
 #define PROGETTOGPU_COMMON_H
@@ -20,5 +23,10 @@
                 cudaGetErrorString(error));                                    \
     }                                                                          \
 }
+
+void printfmatrix(Matrix x, string title);
+void randfmatrix(Matrix& x, int high, int low);
+void randimatrix(Matrix& x, int high);
+
 
 #endif //PROGETTOGPU_COMMON_H
