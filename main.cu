@@ -15,94 +15,38 @@
 void test_add();
 
 int main(void) {
-    //Matrix m = Matrix(N, N);
-    //Matrix v = Matrix(N, 1);
-    //Matrix res = Matrix(N, 1);
-
-    float *d_m;
-    float *m = (float *)malloc (N * N * sizeof (*m));
-    float *d_v;
-    float *v = (float *)malloc (N  * sizeof (*v));
-    float *d_r;
-    float *res = (float *)malloc (N * sizeof (*res));
-
-    CHECK(cudaMalloc((void **)&d_m, N*N*sizeof(*m)));
-    CHECK(cudaMalloc((void **)&d_v, N*1*sizeof(*v)));
-    CHECK(cudaMalloc((void **)&d_r, N*1*sizeof(*res)));
-
+    Matrix m = Matrix(N, N);
+    Matrix v = Matrix(N, 1);
+    Matrix res = Matrix(N, 1);
     float alpha = 1.0f;
-    float beta = 1.0f;
+    float beta = 0.0f;
 
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
-    //m.allocate();
-    //v.allocate();
-    //res.allocate();
+    m.allocate();
+    v.allocate();
+    res.allocate();
 
-    srand (time(NULL));
-    for(int r = 0; r < N; r++){
-        for(int c = 0; c < N; c++)
-            m[r*N+c] = r+c;
-    }
+    randimatrix(m, 5);
+    randimatrix(v, 5);
 
-    for(int r = 0; r < N; r++){
-        for(int c = 0; c < 1; c++)
-            v[r*1+c] = r+c;
-    }
-    //randimatrix(m, 5);
-    //randimatrix(v, 5);
-    printf("x = %d y = %d\n", N, N);
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++)
-            printf("%f ", m[i*1+j]);
-        printf("\n");
-    }
-    printf("\n");
+    m.print_matrix();
+    v.print_matrix();
 
-    printf("x = %d y = %d\n", N, 1);
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < 1; j++)
-            printf("%f ", v[i*1+j]);
-        printf("\n");
-    }
-    printf("\n");
+    m.cpyHostToDevCublas();
+    v.cpyHostToDevCublas();
 
-    //m.print_matrix();
-    //v.print_matrix();
 
-    //m.cpyHostToDev();
-    //v.cpyHostToDev();
-    CHECK(cudaMemcpy(d_m, m, N*N*sizeof(*m), cudaMemcpyHostToDevice));
-    CHECK(cudaMemcpy(d_v, v, N*sizeof(*v), cudaMemcpyHostToDevice));
+    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, m.getX(),
+            m.getY(), &alpha, m.getDevData().get(), m.getX(), v.getDevData().get(), 1, &beta, res.getDevData().get(), 1));
 
-    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, N,
-            N, &alpha, d_m, N, d_v, 1, &beta, d_r, 1));
-    cudaThreadSynchronize();
 
-    CHECK(cudaMemcpy(res, d_r, N*1*sizeof(float), cudaMemcpyDeviceToHost));
-    //res.cpyDevToHost();
-    //res.print_matrix();
-
-    printf("x = %d y = %d\n", N, 1);
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < 1; j++)
-            printf("%f ", res[i*1+j]);
-        printf("\n");
-    }
-    printf("\n");
-
-    //m.destroy(); v.destroy();
-    free(m);
-    free(v);
-    free(res);
-    cudaFree(d_m);
-    cudaFree(d_v);
-    cudaFree(d_r);
+    res.cpyDevToHostCublas();
+    res.print_matrix();
 
     cublasDestroy(handle);
 
-    printf("CUDA RESET");
     cudaDeviceReset();
     return 0;
 }

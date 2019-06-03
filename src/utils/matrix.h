@@ -19,10 +19,8 @@ private:
     bool host_alloc;
     bool dev_alloc;
 
-    //std::shared_ptr<float> host_data;
-    //std::shared_ptr<float> dev_data;
-    float* host_data;
-    float* dev_data;
+    std::shared_ptr<float> host_data;
+    std::shared_ptr<float> dev_data;
 
     void allocHostMemory();
     void allocDevMemory();
@@ -32,7 +30,6 @@ public:
     Matrix() = default;
 
     void allocate();
-    void destroy();
     void allocate_size(size_t x, size_t y);
     void cpyHostToDev();
     void cpyDevToHost();
@@ -43,8 +40,8 @@ public:
 
     void print_matrix();
 
-    float* getHostData() const;
-    float* getDevData() const;
+    const std::shared_ptr<float> &getHostData() const;
+    const std::shared_ptr<float> &getDevData() const;
 
     float& operator[](const int index);
     const float& operator[](const int index) const;
