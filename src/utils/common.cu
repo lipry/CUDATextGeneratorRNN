@@ -27,6 +27,7 @@ void randimatrix(Matrix &x, int high) {
     srand (time(NULL));
     for(int r = 0; r < x.getX(); r++){
         for(int c = 0; c < x.getY(); c++)
-            x[r*x.getY()+c] = (float) (rand() % high);
+            //x[r*x.getY()+c] = (float) (rand() % high);
+            x[r*x.getY()+c] = r+c;
     }
 }

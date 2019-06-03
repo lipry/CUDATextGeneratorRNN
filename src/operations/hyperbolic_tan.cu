@@ -28,7 +28,7 @@ Matrix& Tanh::forward(Matrix &v) {
 
     dim3 TxB(BLOCK_SIZE);
     dim3 num_blocks((V.getY() * V.getX() + TxB.x - 1) / TxB.x);
-    tanhForward<<<num_blocks, TxB>>>(R.getDevData().get(), V.getDevData().get(), R.getX(), R.getY());
+    tanhForward<<<num_blocks, TxB>>>(R.getDevData(), V.getDevData(), R.getX(), R.getY());
 
     return R;
 }
@@ -38,8 +38,8 @@ Matrix& Tanh::backward(Matrix &top_diff) {
 
     dim3 TxB(BLOCK_SIZE);
     dim3 num_blocks((R.getY() * R.getX() + TxB.x - 1) / TxB.x);
-    tanhBackward<<<num_blocks, TxB>>>(dX.getDevData().get(), R.getDevData().get(),
-            top_diff.getDevData().get(), R.getX(), R.getY());
+    tanhBackward<<<num_blocks, TxB>>>(dX.getDevData(), R.getDevData(),
+            top_diff.getDevData(), R.getX(), R.getY());
 
     return dX;
 }
