@@ -18,7 +18,7 @@ Matrix& Add::forward(Matrix& a, Matrix& b){
 
     dim3 TxB(BLOCK_SIZE);
     dim3 num_blocks((A.getY() * A.getX() + TxB.x - 1) / TxB.x);
-    add_vect<<<num_blocks, TxB>>>(R.getDevData(), A.getDevData(), B.getDevData(), A.getX(), A.getY());
+    add_vect<<<num_blocks, TxB>>>(R.getDevData().get(), A.getDevData().get(), B.getDevData().get(), A.getX(), A.getY());
 
     return R;
 }

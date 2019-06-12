@@ -9,44 +9,125 @@
 #include "src/utils/matrix.h"
 #include "src/operations/add.h"
 #include "src/utils/common.h"
+#include "src/operations/prodmatvect.h"
 
 #define N 4
 
 void test_add();
 
 int main(void) {
+    /*cublasHandle_t handle;
+    int len_x = 4;
+    int len_y = 6;
+    float alpha = 1.0f;
+    float * x  = (float *) malloc(len_x * sizeof(float));
+    float * y  = (float *) malloc(len_y * sizeof(float));
+    float * res = (float *) malloc(len_x*len_y);
+
+    float * d_x;
+    float * d_y;
+    float * d_res;
+
+    cudaMalloc((void **) &d_x, sizeof(float) * len_x);
+    cudaMalloc((void **) &d_y, sizeof(float) * len_y);
+    cudaMalloc((void **) &d_res, sizeof(float) * len_x * len_y);
+
+    int ctr = 0;
+    for(int r = 0; r < len_x; r++){ //vettore colonna
+            x[r] =  5;//ctr++
+    }
+
+    ctr = 0;
+    for (int c=0; c < len_y; c++) {
+        y[c] = 7;//ctr++;
+    }
+
+    cublasCreate(&handle);
+
+    cublasSetVector(len_x, sizeof(float), x, 1, d_x, 1);
+    cublasSetVector(len_y, sizeof(float), y, 1, d_y, 1);
+
+    CHECK_CUBLAS(cublasSger(handle, len_x, len_y,
+                            &alpha, d_x, 1, d_y, 1,
+                            d_res, len_x));
+
+    cublasGetMatrix(len_x, len_y, sizeof(float), d_res, len_x, res, len_x);
+
+    printf("X\n");
+    for(int r = 0; r < len_x; r++){ //vettore colonna
+        printf("%f \n", x[r]);
+    }
+    printf("\n");
+
+    printf("Y\n");
+    for (int c=0; c < len_y; c++) {
+        printf("%f ", y[c]); //ctr++;
+    }
+    printf("\n\n");
+
+
+    printf("RES\n");
+    for(int i = 0; i < len_x; i++){
+        for(int j = 0; j < len_y; j++)
+            printf("%f ", res[i*len_x+j]);
+        printf("\n");
+    }
+    printf("\n");
+
+    free(res);
+    free(x);
+    free(y);
+
+    cudaFree(d_res);
+    cudaFree(d_x);
+    cudaFree(d_y);*/
     Matrix m = Matrix(N, N);
     Matrix v = Matrix(N, 1);
-    Matrix res = Matrix(N, 1);
-    float alpha = 1.0f;
-    float beta = 0.0f;
+    Matrix top_diff = Matrix(N, 1);
 
-    cublasHandle_t handle;
-    CHECK_CUBLAS(cublasCreate(&handle));
+    Matrix res;
+    Matrix porcodio;
+    Matrix dv;
 
+    ProdMatVect pmv = ProdMatVect();
     m.allocate();
     v.allocate();
-    res.allocate();
+    top_diff.allocate();
 
     randimatrix(m, 5);
     randimatrix(v, 5);
+    randimatrix(top_diff, 5);
 
+    printf("M\n");
     m.print_matrix();
+    printf("V\n");
     v.print_matrix();
+    printf("TOP DIFF\n");
+    top_diff.print_matrix();
 
-    m.cpyHostToDevCublas();
-    v.cpyHostToDevCublas();
+    m.cpyHostToDev();
+    v.cpyHostToDev();
+    top_diff.cpyHostToDev();
 
+    res = pmv.forward(m, v);
 
-    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, m.getX(),
-            m.getY(), &alpha, m.getDevData().get(), m.getX(), v.getDevData().get(), 1, &beta, res.getDevData().get(), 1));
+    res.cpyDevToHost();
 
-
-    res.cpyDevToHostCublas();
+    printf("FORWARD\n");
     res.print_matrix();
 
-    cublasDestroy(handle);
+    pmv.backward(top_diff);
+    porcodio = pmv.getdW();
+    dv = pmv.getdv();
 
+    dv.cpyDevToHost();
+    porcodio.cpyDevToHost();
+
+    printf("DW\n");
+    porcodio.print_matrix();
+    printf("Dv\n");
+    dv.print_matrix();
+    //test_add();
     cudaDeviceReset();
     return 0;
 }
@@ -74,7 +155,7 @@ void test_add(){
             b[i*N+j] = (float) (rand() % 100);
     }
 
-    printf("A\n");
+    printf("W\n");
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++)
             printf("%f ", a[i*N+j]);
@@ -82,7 +163,7 @@ void test_add(){
     }
     printf("\n");
 
-    printf("B\n");
+    printf("V\n");
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++)
             printf("%f ", b[i*N+j]);
@@ -103,13 +184,13 @@ void test_add(){
     printf("SOMMA\n");
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++)
-            printf("%f ", dX[i*N+j]);
+            printf("%f ", r[i*N+j]);
         printf("\n");
     }
     printf("\n");
 
 }
-
+/*
 void test_sigmoid(){
     Matrix m = Matrix(N, N);
     Matrix top_diff = Matrix(N, N);
@@ -227,4 +308,4 @@ void test_tanh(){
         printf("\n");
     }
     printf("\n");
-}
+}*/

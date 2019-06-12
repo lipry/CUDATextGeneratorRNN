@@ -59,8 +59,12 @@ void Matrix::cpyDevToHost() {
 void Matrix::cpyHostToDevCublas(){
     if(dev_alloc && host_alloc){
         //m = x, n = y
-        if(isVector()) {
+        if(getY() == 1) {
+            printf("entro primo");
             CHECK_CUBLAS(cublasSetVector(x, sizeof(float), host_data.get(), 1, dev_data.get(), 1));
+        }else if(getX() == 1){
+            printf("entro secondo");
+            CHECK_CUBLAS(cublasSetVector(y, sizeof(float), host_data.get(), 1, dev_data.get(), 1));
         }else {
             CHECK_CUBLAS(cublasSetMatrix(x, y, sizeof(float), host_data.get(), x, dev_data.get(), y));
         }
@@ -71,8 +75,10 @@ void Matrix::cpyHostToDevCublas(){
 void Matrix::cpyDevToHostCublas(){
     if(dev_alloc && host_alloc){
         //m = x, n = y
-        if(isVector()){
+        if(getY() == 1) {
             CHECK_CUBLAS(cublasGetVector(x, sizeof(float), dev_data.get(), 1, host_data.get(), 1));
+        }else if(getX() == 1){
+            CHECK_CUBLAS(cublasGetVector(y, sizeof(float), dev_data.get(), 1, host_data.get(), 1));
         }else{
             CHECK_CUBLAS(cublasGetMatrix(x, y, sizeof(float), dev_data.get(), x, host_data.get(), y));
         }
@@ -89,7 +95,7 @@ size_t Matrix::getY() const {
 
 bool Matrix::isVector(){
     // return getX() == 1; ???
-    return getY() == 1;
+    return getY() == 1 || getX() == 1;
 }
 
 void Matrix::print_matrix() {
