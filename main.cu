@@ -21,7 +21,7 @@ int main(void) {
     Matrix top_diff = Matrix(N, 1);
 
     Matrix res;
-    Matrix porcodio;
+    Matrix dW;
     Matrix dv;
 
     ProdMatVect pmv = ProdMatVect();
@@ -52,14 +52,14 @@ int main(void) {
     res.print_matrix();
 
     pmv.backward(top_diff);
-    porcodio = pmv.getdW();
+    dW = pmv.getdW();
     dv = pmv.getdv();
 
     dv.cpyDevToHost();
-    porcodio.cpyDevToHost();
+    dW.cpyDevToHost();
 
     printf("DW\n");
-    porcodio.print_matrix();
+    dW.print_matrix();
     printf("Dv\n");
     dv.print_matrix();
     //test_add();
