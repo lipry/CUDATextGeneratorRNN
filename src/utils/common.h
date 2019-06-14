@@ -11,7 +11,7 @@ using namespace std;
 #ifndef PROGETTOGPU_COMMON_H
 #define PROGETTOGPU_COMMON_H
 
-#define BLOCK_SIZE 256
+#define BLOCK_SIZE 2
 
 #define CHECK(call)                                                            \
 {                                                                              \
