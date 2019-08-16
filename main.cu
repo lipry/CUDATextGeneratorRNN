@@ -23,12 +23,27 @@ int main(void) {
     Matrix W = Matrix(Neurons, Neurons);
     Matrix V = Matrix(N, Neurons);
 
+    Matrix diffh = Matrix(Neurons, 1);
+    Matrix dVproduct = Matrix(N, 1);
+
     x.allocate();
     h_prev.allocate();
+    diffh.allocate();
+    dVproduct.allocate();
+
     for(int i = 0; i < N; i++){
         x[i] = 0;
     }
     x[2] = 1;
+
+    for(int i = 0; i < Neurons; i++){
+        diffh[i] = i+1;
+    }
+    for(int i = 0; i < N; i++){
+        dVproduct[i] = i+1;
+    }
+
+
 
     for(int i = 0; i < Neurons; i++){
         h_prev[i] = 0;
@@ -66,6 +81,13 @@ int main(void) {
     printf("V: \n");
     V.print_matrix();
 
+    printf("diffh: \n");
+    diffh.print_matrix();
+    printf("dVProd: \n");
+    dVproduct.print_matrix();
+
+    diffh.cpyHostToDev();
+    dVproduct.cpyHostToDev();
 
     x.cpyHostToDev();
     h_prev.cpyHostToDev();
@@ -74,7 +96,9 @@ int main(void) {
     V.cpyHostToDev();
 
     RnnLayer rnnlayer = RnnLayer();
-    rnnlayer.forward(x, h_prev, U, W, V);
+    //rnnlayer.forward(x, h_prev, U, W, V);
+    rnnlayer.backward(x, h_prev, U, W, V, diffh, dVproduct);
+
 
 
 

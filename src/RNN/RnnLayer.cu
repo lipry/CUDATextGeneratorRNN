@@ -49,9 +49,30 @@ void RnnLayer::forward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &
 
     Matrix Vprod = Vhproduct.forward(V, h);
 
-    Uprod.cpyDevToHost();
-    Wprod.cpyDevToHost();
-    UWs.cpyDevToHost();
-    h.cpyDevToHost();
-    Vprod.cpyDevToHost();
+}
+
+void RnnLayer::backward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V, Matrix &diffh, Matrix &dVproduct){
+    /*self.forward_pass(x, h_prev, U, W, V)
+    dV, dhv = mul.backward_pass(V, self.h, dVproduct)
+    dh = diffh + dhv
+    dUWsum = tanh.backward_pass(self.UWsum, dh)
+    dUproduct, dWproduct = add.backward_pass(self.Uproduct, self.Wproduct, dUWsum)
+    dU, dx = mul.backward_pass(U, x, dUproduct)
+    dW, dh_prev = mul.backward_pass(W, h_prev, dWproduct)
+    return dx, dh_prev, dU, dW, dV*/
+
+    forward(x, h_prev, U, W, V);
+    Vhproduct.backward(dVproduct);
+    Matrix dV = Vhproduct.getdW();
+    Matrix dhv = Vhproduct.getdv();
+
+    dV.cpyDevToHost();
+    dhv.cpyDevToHost();
+
+    printf("dV: \n");
+    dV.print_matrix();
+    printf("dhv: \n");
+    dhv.print_matrix();
+
+
 }

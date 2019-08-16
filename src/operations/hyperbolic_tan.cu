@@ -43,3 +43,11 @@ Matrix& Tanh::backward(Matrix &top_diff) {
 
     return dX;
 }
+
+const Matrix &Tanh::getR() const {
+    return R;
+}
+
+const Matrix &Tanh::getDx() const {
+    return dX;
+}

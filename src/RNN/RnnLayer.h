@@ -19,6 +19,7 @@ private:
     ProdMatVect Vhproduct;
 public:
     void forward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V);
+    void backward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V, Matrix &diffh, Matrix &dVproduct);
 
 };
 

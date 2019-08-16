@@ -45,15 +45,15 @@ Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
-    printf("W.getX(): %d\n", W.getX());
-    printf("W.getY(): %d\n", W.getY());
-    printf("W: ");
-    W.print_matrix();
-    printf("V: ");
-    V.print_matrix();
+    //printf("W.getX(): %d\n", W.getX());
+    //printf("W.getY(): %d\n", W.getY());
+    //printf("W: ");
+    //W.print_matrix();
+    //printf("V: ");
+    //V.print_matrix();
 
 
-    W.print_matrix();
+    //W.print_matrix();
 
     CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_T, W.getY(),
             W.getX(), &alpha, W.getDevData().get(), W.getY(),
@@ -76,8 +76,8 @@ void ProdMatVect::backward(Matrix &top_diff) {
     CHECK_CUBLAS(cublasCreate(&handle));
 
     //OK
-    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, W.getX(),
-                             W.getY(), &alpha, W.getDevData().get(), W.getX(),
+    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_T, W.getY(),
+                             W.getX(), &alpha, W.getDevData().get(), W.getY(),
                              top_diff.getDevData().get(), 1, &beta, dv.getDevData().get(), 1));
     cublasDestroy(handle);
 

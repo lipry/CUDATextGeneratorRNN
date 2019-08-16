@@ -16,6 +16,10 @@ private:
 public:
     Matrix& forward(Matrix &v);
     Matrix& backward(Matrix &top_diff);
+
+    const Matrix &getR() const;
+
+    const Matrix &getDx() const;
 };
 
 
