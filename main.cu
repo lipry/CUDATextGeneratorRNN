@@ -10,121 +10,79 @@
 #include "src/operations/add.h"
 #include "src/utils/common.h"
 #include "src/operations/prodmatvect.h"
+#include "src/RNN/RnnLayer.h"
 
-#define N 4
+#define N 7
+#define Neurons 6
 
-void test_add();
 
 int main(void) {
-    Matrix m = Matrix(N, N);
-    Matrix v = Matrix(N, 1);
-    Matrix top_diff = Matrix(N, 1);
+    Matrix x = Matrix(N, 1);
+    Matrix h_prev = Matrix(Neurons, 1);
+    Matrix U = Matrix(Neurons, N);
+    Matrix W = Matrix(Neurons, Neurons);
+    Matrix V = Matrix(N, Neurons);
 
-    Matrix res;
-    Matrix dW;
-    Matrix dv;
+    x.allocate();
+    h_prev.allocate();
+    for(int i = 0; i < N; i++){
+        x[i] = 0;
+    }
+    x[2] = 1;
 
-    ProdMatVect pmv = ProdMatVect();
-    m.allocate();
-    v.allocate();
-    top_diff.allocate();
+    for(int i = 0; i < Neurons; i++){
+        h_prev[i] = 0;
+    }
 
-    randimatrix(m, 5);
-    randimatrix(v, 5);
-    randimatrix(top_diff, 5);
+    U.allocate();
+    for(int r = 0; r<Neurons; r++){
+        for(int c = 0; c<N; c++){
+            U[r*N+c] = c+1;
+        }
+    }
 
-    printf("M\n");
-    m.print_matrix();
-    printf("V\n");
-    v.print_matrix();
-    printf("TOP DIFF\n");
-    top_diff.print_matrix();
+    W.allocate();
+    for(int r = 0; r<Neurons; r++){
+        for(int c = 0; c<Neurons; c++){
+            W[r*Neurons+c] = c+1;
+        }
+    }
 
-    m.cpyHostToDev();
-    v.cpyHostToDev();
-    top_diff.cpyHostToDev();
+    V.allocate();
+    for(int r = 0; r<N; r++){
+        for(int c = 0; c<Neurons; c++){
+            V[r*Neurons+c] = c+1;
+        }
+    }
 
-    res = pmv.forward(m, v);
+    printf("X: \n");
+    x.print_matrix();
+    printf("h_prev: \n");
+    h_prev.print_matrix();
+    printf("U: \n");
+    U.print_matrix();
+    printf("W: \n");
+    W.print_matrix();
+    printf("V: \n");
+    V.print_matrix();
 
-    res.cpyDevToHost();
 
-    printf("FORWARD\n");
-    res.print_matrix();
+    x.cpyHostToDev();
+    h_prev.cpyHostToDev();
+    U.cpyHostToDev();
+    W.cpyHostToDev();
+    V.cpyHostToDev();
 
-    pmv.backward(top_diff);
-    dW = pmv.getdW();
-    dv = pmv.getdv();
+    RnnLayer rnnlayer = RnnLayer();
+    rnnlayer.forward(x, h_prev, U, W, V);
 
-    dv.cpyDevToHost();
-    dW.cpyDevToHost();
 
-    printf("DW\n");
-    dW.print_matrix();
-    printf("Dv\n");
-    dv.print_matrix();
-    //test_add();
+
+
     cudaDeviceReset();
     return 0;
 }
 
-void test_add(){
-    Matrix a = Matrix(N, N);
-    Matrix b = Matrix(N, N);
-    Matrix r;
-    Matrix dX;
-
-    Add x;
-
-    srand (time(NULL));
-
-    a.allocate();
-    b.allocate();
-
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++)
-            a[i*N+j] = (float) (rand() % 100);
-    }
-
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++)
-            b[i*N+j] = (float) (rand() % 100);
-    }
-
-    printf("W\n");
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++)
-            printf("%f ", a[i*N+j]);
-        printf("\n");
-    }
-    printf("\n");
-
-    printf("V\n");
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++)
-            printf("%f ", b[i*N+j]);
-        printf("\n");
-    }
-    printf("\n");
-
-    a.cpyHostToDev();
-    b.cpyHostToDev();
-
-    r = x.forward(a, b);
-    r.cpyDevToHost();
-
-    dX = x.backward(a);
-    dX.cpyDevToHost();
-
-
-    printf("SOMMA\n");
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++)
-            printf("%f ", r[i*N+j]);
-        printf("\n");
-    }
-    printf("\n");
-
-}
 /*
 void test_sigmoid(){
     Matrix m = Matrix(N, N);
@@ -243,4 +201,62 @@ void test_tanh(){
         printf("\n");
     }
     printf("\n");
-}*/
+}
+
+ void test_add(){
+    Matrix a = Matrix(N, N);
+    Matrix b = Matrix(N, N);
+    Matrix r;
+    Matrix dX;
+
+    Add x;
+
+    srand (time(NULL));
+
+    a.allocate();
+    b.allocate();
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            a[i*N+j] = (float) (rand() % 100);
+    }
+
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            b[i*N+j] = (float) (rand() % 100);
+    }
+
+    printf("W\n");
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            printf("%f ", a[i*N+j]);
+        printf("\n");
+    }
+    printf("\n");
+
+    printf("V\n");
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            printf("%f ", b[i*N+j]);
+        printf("\n");
+    }
+    printf("\n");
+
+    a.cpyHostToDev();
+    b.cpyHostToDev();
+
+    r = x.forward(a, b);
+    r.cpyDevToHost();
+
+    dX = x.backward(a);
+    dX.cpyDevToHost();
+
+
+    printf("SOMMA\n");
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++)
+            printf("%f ", r[i*N+j]);
+        printf("\n");
+    }
+    printf("\n");
+ }*/

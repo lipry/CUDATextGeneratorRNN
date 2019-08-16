@@ -30,14 +30,14 @@ __global__ void outerProduct(float *Res, float *A, float *B, int N)
 }
 
 Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
-    if (w.getY() != v.getX())
+    /*if (w.getY() != v.getX())
         throw std::invalid_argument( "Matrix and Vectors dimension are not valid" );
     if(v.getY() != 1)
-        throw std::invalid_argument( "V not a vector (Y != 1)" );
+        throw std::invalid_argument( "V not a vector (Y != 1)" );*/
 
     this->W = w;
     this->V = v;
-    R.allocate_size(v.getX(), 1);
+    R.allocate_size(w.getX(), 1);
 
     float alpha = 1.0f;
     float beta = 0.0f;
@@ -45,8 +45,18 @@ Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
-    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, W.getX(),
-            W.getY(), &alpha, W.getDevData().get(), W.getX(),
+    printf("W.getX(): %d\n", W.getX());
+    printf("W.getY(): %d\n", W.getY());
+    printf("W: ");
+    W.print_matrix();
+    printf("V: ");
+    V.print_matrix();
+
+
+    W.print_matrix();
+
+    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_T, W.getY(),
+            W.getX(), &alpha, W.getDevData().get(), W.getY(),
             V.getDevData().get(), 1, &beta, R.getDevData().get(), 1));
 
     cublasDestroy(handle);
@@ -55,6 +65,7 @@ Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
 }
 
 void ProdMatVect::backward(Matrix &top_diff) {
+    //TODO: CONTROLLARE TUTTO
     this->dW.allocate_size(W.getX(), W.getY());
     this->dv.allocate_size(top_diff.getX(), top_diff.getY());
 

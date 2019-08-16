@@ -8,16 +8,17 @@
 
 #include "../operations/prodmatvect.h"
 #include "../operations/add.h"
-#include "../operations/sigmoid.h"
+#include "../operations/hyperbolic_tan.h"
 
 class RnnLayer {
 private:
     ProdMatVect Uproduct;
     ProdMatVect Wproduct;
     Add UWsum;
-    Sigmoid ht;
+    Tanh ht;
     ProdMatVect Vhproduct;
 public:
+    void forward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V);
 
 };
 
