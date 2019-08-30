@@ -17,8 +17,8 @@ private:
     Matrix dv;
 
 public:
-    Matrix& forward(Matrix& a, Matrix& v);
-    void backward(Matrix& top_diff);
+    Matrix& forward(cublasHandle_t handle, Matrix& a, Matrix& v);
+    void backward(cublasHandle_t handle, Matrix& top_diff);
 
     Matrix& getdMatrix();
     Matrix& getdVector();

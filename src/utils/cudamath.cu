@@ -34,7 +34,7 @@ __global__ void outerProduct(float *Res, float *A, float *B, int N)
 }
 
 __device__ float tanh_derivate(float x, float top_diff){
-    return (1.0f - sqrt(x)) * top_diff;
+    return (1.0f - x*x) * top_diff;
 }
 
 __global__ void tanhForward(float* R, float* V, int x, int y){

@@ -21,13 +21,6 @@ Matrix& Tanh::forward(Matrix &v) {
 
 Matrix& Tanh::backward(Matrix &top_diff) {
     dX.allocate_size(R.getX(), R.getY());
-    printf("R tanh: \n");
-    R.cpyDevToHost();
-    R.print_matrix();
-
-    printf("top_diff tanh: \n");
-    top_diff.cpyDevToHost();
-    top_diff.print_matrix();
 
     dim3 TxB(BLOCK_SIZE);
     dim3 num_blocks((R.getY() * R.getX() + TxB.x - 1) / TxB.x);

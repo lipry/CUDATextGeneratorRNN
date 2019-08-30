@@ -35,103 +35,36 @@
 #include "../utils/common.h"
 #include "../utils/cudamath.h"
 
-void RnnLayer::forward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V){
-    /*
-*       self.Uproduct = mul.forward_pass(U, x)
-        self.Wproduct = mul.forward_pass(M, h_prev)
-        self.UWsum = add.forward_pass(self.Uproduct, self.Wproduct)
-        self.h = tanh.forward_pass(self.UWsum)
 
-        self.Vproduct = mul.forward_pass(V, self.h)
-     */
-    Matrix Uprod = Uproduct.forward(U, x);
-    printf("Uprod: \n");
-    Uprod.cpyDevToHost();
-    Uprod.print_matrix();
-    Matrix Wprod = Wproduct.forward(W, h_prev);
-    printf("Wprod: \n");
-    Wprod.cpyDevToHost();
-    Wprod.print_matrix();
+void RnnLayer::forward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V){
+    Matrix Uprod = Uproduct.forward(handle, U, x);
+    Matrix Wprod = Wproduct.forward(handle, W, h_prev);
     Matrix UWs = UWsum.forward(Uprod, Wprod);
-    printf("UWs: \n");
-    UWs.cpyDevToHost();
-    UWs.print_matrix();
     this->h = ht.forward(UWs);
-    this->output = Vhproduct.forward(V, h);
+    this->output = Vhproduct.forward(handle, V, h);
 }
 
-void RnnLayer::backward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V, Matrix &diffh, Matrix &dVproduct){
-    /*self.forward_pass(x, h_prev, U, M, V)
-    dV, dhv = mul.backward_pass(V, self.h, dVproduct)
-    dh = diffh + dhv
-    dUWsum = tanh.backward_pass(self.UWsum, dh)
-    dUWproduct, dWproduct = add.backward_pass(self.Uproduct, self.Wproduct, dUWsum)
-    dU, dx = mul.backward_pass(U, x, dUWproduct)
-    dM, dh_prev = mul.backward_pass(M, h_prev, dWproduct)
-    return dx, dh_prev, dU, dM, dV*/
-
-    this->forward(x, h_prev, U, W, V);
-    Vhproduct.backward(dVproduct);
-    Matrix dV = Vhproduct.getdMatrix();
+void RnnLayer::backward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V, Matrix &diffh, Matrix &dVproduct){
+    this->forward(handle, x, h_prev, U, W, V);
+    Vhproduct.backward(handle, dVproduct);
+    this->dV = Vhproduct.getdMatrix();
     Matrix dhv = Vhproduct.getdVector();
-
-    dV.cpyDevToHost();
-    dhv.cpyDevToHost();
-
-    printf("dV: \n");
-    dV.print_matrix();
-    printf("dhv: \n");
-    dhv.print_matrix();
-
-    /*Matrix dh;
+    Matrix dh;
     dh.allocate_size(dhv.getX(), dhv.getY());
 
-    // dh = diffh + dhv
     dim3 TxB(BLOCK_SIZE);
     dim3 num_blocks((dhv.getY() * dhv.getX() + TxB.x - 1) / TxB.x);
     add_vect<<<num_blocks, TxB>>>(dh.getDevData().get(), dhv.getDevData().get(), diffh.getDevData().get(), dhv.getX(), diffh.getY());
 
-    printf("dh: \n");
-    dh.cpyDevToHost();
-    dh.print_matrix();
-
     Matrix dUwsum = ht.backward(dh);
-
-    printf("dUWsum: \n");
-    dUwsum.cpyDevToHost();
-    dUwsum.print_matrix();
-
     //dUWproduct == dWproduct nella derivata della somma
     Matrix dUWproduct = UWsum.backward(dUwsum);
-
-    printf("------ dUWproduct: \n");
-    dUWproduct.cpyDevToHost();
-    dUWproduct.print_matrix();
-
-    Wproduct.backward(dUWproduct);
-    Matrix dh_prev = Wproduct.getdVector();
-    Matrix dW = Wproduct.getdMatrix();
-
-    printf("------ dh_prev: \n");
-    dh_prev.cpyDevToHost();
-    dh_prev.print_matrix();
-
-    printf("------ dW: \n");
-    dW.cpyDevToHost();
-    dW.print_matrix();
-
-    Uproduct.backward(dUWproduct);
-    Matrix dx = Uproduct.getdVector();
-    Matrix dU = Uproduct.getdMatrix();
-
-    printf("------ dx: \n");
-    dx.cpyDevToHost();
-    dx.print_matrix();
-
-    printf("------ dU: \n");
-    dU.cpyDevToHost();
-    dU.print_matrix();*/
-
+    Uproduct.backward(handle, dUWproduct);
+    this->dx = Uproduct.getdVector();
+    this->dU = Uproduct.getdMatrix();
+    Wproduct.backward(handle, dUWproduct);
+    this->dh_prev = Wproduct.getdVector();
+    this->dW = Wproduct.getdMatrix();
 }
 
 const Matrix &RnnLayer::getH() const {
@@ -140,4 +73,24 @@ const Matrix &RnnLayer::getH() const {
 
 const Matrix &RnnLayer::getOutput() const {
     return output;
+}
+
+const Matrix &RnnLayer::getDx() const {
+    return dx;
+}
+
+const Matrix &RnnLayer::getDhPrev() const {
+    return dh_prev;
+}
+
+const Matrix &RnnLayer::getDU() const {
+    return dU;
+}
+
+const Matrix &RnnLayer::getDW() const {
+    return dW;
+}
+
+const Matrix &RnnLayer::getDV() const {
+    return dV;
 }

@@ -9,7 +9,7 @@
 #include <cmath>
 
 
-Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
+Matrix& ProdMatVect::forward(cublasHandle_t handle, Matrix& w, Matrix& v){
     /*if (w.getY() != v.getX())
         throw std::invalid_argument( "Matrix and Vectors dimension are not valid" );
     if(v.getY() != 1)
@@ -22,55 +22,25 @@ Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
     float alpha = 1.0f;
     float beta = 0.0f;
 
-    cublasHandle_t handle;
-    CHECK_CUBLAS(cublasCreate(&handle));
-
-    //printf("M.getX(): %d\n", M.getX());
-    //printf("M.getY(): %d\n", M.getY());
-    //printf("M: ");
-    //M.print_matrix();
-    //printf("V: ");
-    //V.print_matrix();
-
-
-    //M.print_matrix();
-    //M = Y
-    //N = X
     CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_T, M.getY(),
             M.getX(), &alpha, M.getDevData().get(), M.getY(),
             V.getDevData().get(), 1, &beta, R.getDevData().get(), 1));
 
-    cublasDestroy(handle);
-
     return R;
 }
 
-void ProdMatVect::backward(Matrix &top_diff) {
-    //TODO: CONTROLLARE TUTTO
+void ProdMatVect::backward(cublasHandle_t handle, Matrix &top_diff) {
     this->dM.allocate_size(top_diff.getX(), V.getX());
     this->dv.allocate_size(M.getY(), top_diff.getY());
 
     float alpha = 1.0f;
     float beta = 0.0f;
 
-    cublasHandle_t handle;
-    CHECK_CUBLAS(cublasCreate(&handle));
-
     //dv
     size_t m = M.getY();
     size_t n = M.getX();
     CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, m, n,
             &alpha, M.getDevData().get(), m, top_diff.getDevData().get(), 1, &beta, dv.getDevData().get(), 1));
-
-    cublasDestroy(handle);
-
-    printf("V backward mul: \n");
-    V.cpyDevToHost();
-    V.print_matrix();
-
-    printf("top_diff backward mul: \n");
-    top_diff.cpyDevToHost();
-    top_diff.print_matrix();
 
     dim3 TxB(BLOCK_SIZE, BLOCK_SIZE);
     dim3 num_blocks(ceil(float(dM.getY())/TxB.x), ceil(float(dM.getX())/TxB.y));
