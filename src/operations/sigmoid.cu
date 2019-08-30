@@ -6,28 +6,10 @@
 #include "sigmoid.h"
 #include "../utils/matrix.h"
 #include "../utils/common.h"
+#include "../utils/cudamath.h"
 #include <stdlib.h>
 #include <stdio.h>
 
-__device__ float sigmoid(float x){
-    return 1.0f / (1 + exp(-x)); //TODO: parallelizzare exp
-}
-
-__device__ float sigmoid_derivate(float x, float top_diff){
-    return (1.0f - x)* x * top_diff;
-}
-
-__global__ void sigmoidForward(float* R, float* V, int x, int y){
-    int index = blockDim.x * blockIdx.x + threadIdx.x;
-    if(index < x*y)
-        R[index] = sigmoid(V[index]);
-}
-
-__global__ void sigmoidBackward(float* dR, float* V, float *top_diff, int x, int y){
-    int index = blockDim.x * blockIdx.x + threadIdx.x;
-    if(index < x*y)
-        dR[index] = sigmoid_derivate(V[index], top_diff[index]);
-}
 
 Matrix& Sigmoid::forward(Matrix &v){
     this->V = v;

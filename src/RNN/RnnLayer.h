@@ -17,9 +17,14 @@ private:
     Add UWsum;
     Tanh ht;
     ProdMatVect Vhproduct;
+    Matrix h;
+    Matrix output;
+
 public:
     void forward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V);
     void backward(Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V, Matrix &diffh, Matrix &dVproduct);
+    const Matrix &getH() const;
+    const Matrix &getOutput() const;
 
 };
 

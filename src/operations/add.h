@@ -13,7 +13,8 @@ private:
     Matrix A;
     Matrix B;
     Matrix R;
-    Matrix dX;
+    Matrix dA;
+    Matrix dB;
 
 public:
     Matrix& forward(Matrix& a, Matrix& b);

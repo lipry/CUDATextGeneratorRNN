@@ -5,6 +5,7 @@
 #include "cublas_v2.h"
 #include "matrix.h"
 #include "common.h"
+#include <bits/stdc++.h>
 
 Matrix::Matrix(size_t x, size_t y) : x(x), y(y), host_alloc(false), dev_alloc(false),
 dev_data(nullptr), host_data(nullptr)
@@ -91,6 +92,13 @@ size_t Matrix::getX() const {
 
 size_t Matrix::getY() const {
     return y;
+}
+
+void Matrix::matrix_like(float number, Matrix &mat){
+    allocate_size(mat.getY(), mat.getX());
+    for(int i = 0; i<getX()*getY(); i++){
+        this->host_data.get()[i] = number;
+    }
 }
 
 bool Matrix::isVector(){

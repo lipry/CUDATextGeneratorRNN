@@ -10,18 +10,18 @@
 
 class ProdMatVect {
 private:
-    Matrix W;
+    Matrix M;
     Matrix V;
     Matrix R;
-    Matrix dW;
+    Matrix dM;
     Matrix dv;
 
 public:
     Matrix& forward(Matrix& a, Matrix& v);
     void backward(Matrix& top_diff);
 
-    Matrix& getdW();
-    Matrix& getdv();
+    Matrix& getdMatrix();
+    Matrix& getdVector();
 };
 
 

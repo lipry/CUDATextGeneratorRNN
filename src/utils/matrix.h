@@ -35,6 +35,7 @@ public:
     void cpyDevToHost();
     void cpyHostToDevCublas();
     void cpyDevToHostCublas();
+    void matrix_like(float number, Matrix &x);
     size_t getX() const;
     size_t getY() const;
 

@@ -5,29 +5,9 @@
 #include "cublas_v2.h"
 #include "../utils/common.h"
 #include "prodmatvect.h"
+#include "../utils/cudamath.h"
+#include <cmath>
 
-__global__ void outerProduct(float *Res, float *A, float *B, int N)
-{
-    int i, j, x, y;
-    // Determine matrix element row i and column j.
-    x = threadIdx.x;
-    y = threadIdx.y;
-    i = blockIdx.y*blockDim.y + y;
-    j = blockIdx.x*blockDim.x + x;
-
-    __shared__ float shrA[BLOCK_SIZE];
-    __shared__ float shrB[BLOCK_SIZE];
-
-    if (x == 0)
-        shrA[y] = A[i];
-    __syncthreads();
-
-    if(y == 0)
-        shrB[x] = B[j];
-    __syncthreads();
-
-    Res[i*N + j] = shrA[y]*shrB[x];
-}
 
 Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
     /*if (w.getY() != v.getX())
@@ -35,7 +15,7 @@ Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
     if(v.getY() != 1)
         throw std::invalid_argument( "V not a vector (Y != 1)" );*/
 
-    this->W = w;
+    this->M = w;
     this->V = v;
     R.allocate_size(w.getX(), 1);
 
@@ -45,18 +25,19 @@ Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
-    //printf("W.getX(): %d\n", W.getX());
-    //printf("W.getY(): %d\n", W.getY());
-    //printf("W: ");
-    //W.print_matrix();
+    //printf("M.getX(): %d\n", M.getX());
+    //printf("M.getY(): %d\n", M.getY());
+    //printf("M: ");
+    //M.print_matrix();
     //printf("V: ");
     //V.print_matrix();
 
 
-    //W.print_matrix();
-
-    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_T, W.getY(),
-            W.getX(), &alpha, W.getDevData().get(), W.getY(),
+    //M.print_matrix();
+    //M = Y
+    //N = X
+    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_T, M.getY(),
+            M.getX(), &alpha, M.getDevData().get(), M.getY(),
             V.getDevData().get(), 1, &beta, R.getDevData().get(), 1));
 
     cublasDestroy(handle);
@@ -66,8 +47,8 @@ Matrix& ProdMatVect::forward(Matrix& w, Matrix& v){
 
 void ProdMatVect::backward(Matrix &top_diff) {
     //TODO: CONTROLLARE TUTTO
-    this->dW.allocate_size(W.getX(), W.getY());
-    this->dv.allocate_size(top_diff.getX(), top_diff.getY());
+    this->dM.allocate_size(top_diff.getX(), V.getX());
+    this->dv.allocate_size(M.getY(), top_diff.getY());
 
     float alpha = 1.0f;
     float beta = 0.0f;
@@ -75,22 +56,32 @@ void ProdMatVect::backward(Matrix &top_diff) {
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
-    //OK
-    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_T, W.getY(),
-                             W.getX(), &alpha, W.getDevData().get(), W.getY(),
-                             top_diff.getDevData().get(), 1, &beta, dv.getDevData().get(), 1));
+    //dv
+    size_t m = M.getY();
+    size_t n = M.getX();
+    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, m, n,
+            &alpha, M.getDevData().get(), m, top_diff.getDevData().get(), 1, &beta, dv.getDevData().get(), 1));
+
     cublasDestroy(handle);
 
+    printf("V backward mul: \n");
+    V.cpyDevToHost();
+    V.print_matrix();
+
+    printf("top_diff backward mul: \n");
+    top_diff.cpyDevToHost();
+    top_diff.print_matrix();
+
     dim3 TxB(BLOCK_SIZE, BLOCK_SIZE);
-    dim3 num_blocks(dW.getY()/TxB.x, dW.getX()/TxB.y);
-    outerProduct<<<num_blocks, TxB>>>(dW.getDevData().get(), V.getDevData().get(),
-            top_diff.getDevData().get(), W.getX());
+    dim3 num_blocks(ceil(float(dM.getY())/TxB.x), ceil(float(dM.getX())/TxB.y));
+    outerProduct<<<num_blocks, TxB>>>(dM.getDevData().get(), top_diff.getDevData().get(),
+            V.getDevData().get(), dM.getY());
 }
 
-Matrix& ProdMatVect::getdW() {
-    return this->dW;
+Matrix& ProdMatVect::getdMatrix() {
+    return this->dM;
 }
 
-Matrix& ProdMatVect::getdv() {
+Matrix& ProdMatVect::getdVector() {
     return this->dv;
 }
