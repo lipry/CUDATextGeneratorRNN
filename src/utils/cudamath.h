@@ -7,6 +7,10 @@
 
 __global__ void add_vect(float *R, float *A, float *B, int x, int y);
 
+__global__ void add_const_vect(float *R, float *A, float to_add, int x, int y);
+
+__global__ void exp_predict(float *R, float *A, float max, int x, int y);
+
 __global__ void outerProduct(float *Res, float *A, float *B, int N);
 
 __device__ float tanh_derivate(float x, float top_diff);

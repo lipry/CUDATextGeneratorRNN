@@ -9,6 +9,19 @@ __global__ void add_vect(float *R, float *A, float *B, int x, int y){
         R[idx] = A[idx] + B[idx]; // TODO: fare un altra funzione __device__?
 }
 
+__global__ void add_const_vect(float *R, float *A, float to_add, int x, int y){
+    int idx = blockDim.x*blockIdx.x + threadIdx.x;
+    if(idx < x*y)
+        R[idx] = A[idx] + to_add;
+}
+
+__global__ void exp_predict(float *R, float *A, float max, int x, int y){
+    int idx = blockDim.x*blockIdx.x + threadIdx.x;
+    if(idx < x*y){
+        R[idx] = exp(A[idx]-max);
+    }
+}
+
 __global__ void outerProduct(float *Res, float *A, float *B, int N)
 {
     int i, j, x, y;

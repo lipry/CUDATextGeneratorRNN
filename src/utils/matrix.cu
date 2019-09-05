@@ -45,6 +45,13 @@ void Matrix::allocate() {
     }
 }
 
+bool Matrix::isDevAlloc(){
+    return dev_alloc;
+}
+
+bool Matrix::isHostAlloc(){
+    return host_alloc;
+}
 
 void Matrix::cpyHostToDev() {
     if(dev_alloc && host_alloc) {

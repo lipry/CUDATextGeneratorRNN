@@ -6,8 +6,17 @@
 #define PROGETTOGPU_OUTPUTLAYER_H
 
 
-class outputlayer {
-    
+#include "../utils/matrix.h"
+#include "cublas_v2.h"
+
+class OutputLayer {
+private:
+    Matrix predictions;
+public:
+    void predict(cublasHandle_t handle, Matrix &x);
+    float loss(cublasHandle_t handle, Matrix &x, int y);
+    Matrix& diff(cublasHandle_t handle, Matrix &x, int y);
+    const Matrix &getPredictions() const;
 };
 
 

@@ -12,6 +12,7 @@
 #include "src/operations/prodmatvect.h"
 #include "src/RNN/RnnLayer.h"
 #include "src/utils/cudamath.h"
+#include "src/operations/outputlayer.h"
 #include <chrono>
 #include <iostream>
 
@@ -91,11 +92,11 @@ int main(void) {
         }
     }
 
-    /*printf("X: \n");
+    printf("X: \n");
     x.print_matrix();
     printf("h_prev: \n");
     h_prev.print_matrix();
-    printf("U: \n");
+    /*printf("U: \n");
     U.print_matrix();
     printf("W: \n");
     W.print_matrix();
@@ -119,6 +120,13 @@ int main(void) {
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
+    OutputLayer outlayer;
+    Matrix R = outlayer.diff(handle, h_prev, 4);
+
+    //printf("loss: %f", res);
+    printf("\nR: \n");
+    R.print_matrix();
+
     //Matrix h = rnnlayer.getH();
     //Matrix output = rnnlayer.getOutput();
 
@@ -129,7 +137,7 @@ int main(void) {
     h.print_matrix();
     printf("output: \n");
     output.print_matrix();*/
-    RnnLayer rnnlayer;
+    /*RnnLayer rnnlayer;
     auto t1 = std::chrono::high_resolution_clock::now();
     for(int i = 0; i < 20; i++){
         rnnlayer = RnnLayer();
@@ -151,7 +159,7 @@ int main(void) {
     dW.cpyDevToHost();
     dV.cpyDevToHost();
     dU.cpyDevToHost();
-    dh_prev.cpyDevToHost();
+    dh_prev.cpyDevToHost();*/
 
     /*printf("dx \n");
     dx.print_matrix();

@@ -31,6 +31,8 @@ public:
 
     void allocate();
     void allocate_size(size_t x, size_t y);
+    bool isDevAlloc();
+    bool isHostAlloc();
     void cpyHostToDev();
     void cpyDevToHost();
     void cpyHostToDevCublas();
