@@ -44,7 +44,9 @@ void RnnLayer::forward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix 
     this->output = Vhproduct.forward(handle, V, h);
 }
 
-void RnnLayer::backward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix &U, Matrix &W, Matrix &V, Matrix &diffh, Matrix &dVproduct){
+void RnnLayer::backward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix &U,
+        Matrix &W, Matrix &V, Matrix &diffh, Matrix &dVproduct){
+
     this->forward(handle, x, h_prev, U, W, V);
     Vhproduct.backward(handle, dVproduct);
     this->dV = Vhproduct.getdMatrix();
@@ -54,10 +56,10 @@ void RnnLayer::backward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix
 
     dim3 TxB(BLOCK_SIZE);
     dim3 num_blocks((dhv.getY() * dhv.getX() + TxB.x - 1) / TxB.x);
-    add_vect<<<num_blocks, TxB>>>(dh.getDevData().get(), dhv.getDevData().get(), diffh.getDevData().get(), dhv.getX(), diffh.getY());
+    add_vect<<<num_blocks, TxB>>>(dh.getDevData().get(), dhv.getDevData().get(),
+            diffh.getDevData().get(), dhv.getX(), diffh.getY());
 
     Matrix dUwsum = ht.backward(dh);
-    //dUWproduct == dWproduct nella derivata della somma
     Matrix dUWproduct = UWsum.backward(dUwsum);
     Uproduct.backward(handle, dUWproduct);
     this->dx = Uproduct.getdVector();
