@@ -2,7 +2,6 @@
 // Created by Fabio Lipreri on 2019-05-14.
 //
 
-#include <math.h>
 #include "sigmoid.h"
 #include "../utils/matrix.h"
 #include "../utils/common.h"

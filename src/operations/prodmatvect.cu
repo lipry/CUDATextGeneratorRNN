@@ -6,7 +6,6 @@
 #include "../utils/common.h"
 #include "prodmatvect.h"
 #include "../utils/cudamath.h"
-#include <cmath>
 
 
 Matrix& ProdMatVect::forward(cublasHandle_t handle, Matrix& w, Matrix& v){

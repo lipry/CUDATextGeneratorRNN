@@ -4,7 +4,6 @@
 #include "cublas_v2.h"
 
 #include "src/operations/hyperbolic_tan.h"
-#include <math.h>
 #include <stdio.h>
 #include "src/utils/matrix.h"
 #include "src/operations/add.h"
@@ -20,7 +19,7 @@
 #define N 7
 #define Neurons 6
 
-//istanze N = 50000, Neurons = 5000, un loop di backpropagation su python 600ms, con cuda 5 ms.
+//istanze N = 5000, Neurons = 5000, un loop di backpropagation su python 600ms, con cuda 5 ms.
 
 int main(void) {
 
@@ -96,7 +95,7 @@ int main(void) {
     x.print_matrix();
     printf("h_prev: \n");
     h_prev.print_matrix();
-    /*printf("U: \n");
+    printf("U: \n");
     U.print_matrix();
     printf("W: \n");
     W.print_matrix();
@@ -109,7 +108,7 @@ int main(void) {
     dVproduct.print_matrix();
 
     diffh.cpyHostToDev();
-    dVproduct.cpyHostToDev();*/
+    dVproduct.cpyHostToDev();
 
     x.cpyHostToDev();
     h_prev.cpyHostToDev();
@@ -120,48 +119,39 @@ int main(void) {
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
-    OutputLayer outlayer;
-    Matrix R = outlayer.diff(handle, h_prev, 4);
-
-    //printf("loss: %f", res);
-    printf("\nR: \n");
-    R.print_matrix();
-
-    //Matrix h = rnnlayer.getH();
-    //Matrix output = rnnlayer.getOutput();
-
-    //h.cpyDevToHost();
-    //output.cpyDevToHost();
-
-    /*printf("h: \n");
-    h.print_matrix();
-    printf("output: \n");
-    output.print_matrix();*/
-    /*RnnLayer rnnlayer;
     auto t1 = std::chrono::high_resolution_clock::now();
-    for(int i = 0; i < 20; i++){
+    RnnLayer rnnlayer;
+    for(int i = 0; i < 1; i++){
         rnnlayer = RnnLayer();
-        //rnnlayer.forward(handle, x, h_prev, U, W, V);
+        rnnlayer.forward(handle, x, h_prev, U, W, V);
         rnnlayer.backward(handle, x, h_prev, U, W, V, diffh, dVproduct);
     }
     auto t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 
-    cout << "time elapsed: "<< duration / 20 << endl;
+    cout << "time elapsed: "<< duration / 1 << endl;
 
+    Matrix h = rnnlayer.getH();
+    Matrix output = rnnlayer.getOutput();
     Matrix dx = rnnlayer.getDx();
     Matrix dW = rnnlayer.getDW();
     Matrix dV = rnnlayer.getDV();
     Matrix dU = rnnlayer.getDU();
     Matrix dh_prev = rnnlayer.getDhPrev();
 
+    h.cpyDevToHost();
+    output.cpyDevToHost();
     dx.cpyDevToHost();
     dW.cpyDevToHost();
     dV.cpyDevToHost();
     dU.cpyDevToHost();
-    dh_prev.cpyDevToHost();*/
+    dh_prev.cpyDevToHost();
 
-    /*printf("dx \n");
+    printf("h: \n");
+    h.print_matrix();
+    printf("output: \n");
+    output.print_matrix();
+    printf("dx \n");
     dx.print_matrix();
     printf("dW \n");
     dW.print_matrix();
@@ -170,7 +160,7 @@ int main(void) {
     printf("dU \n");
     dU.print_matrix();
     printf("dh_prev \n");
-    dh_prev.print_matrix();*/
+    dh_prev.print_matrix();
     cublasDestroy(handle);
     cudaDeviceReset();
     return 0;

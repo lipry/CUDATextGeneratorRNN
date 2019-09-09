@@ -5,7 +5,6 @@
 #include "hyperbolic_tan.h"
 #include "../utils/common.h"
 #include "../utils/cudamath.h"
-#include <math.h>
 
 
 Matrix& Tanh::forward(Matrix &v) {
