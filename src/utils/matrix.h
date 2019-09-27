@@ -38,6 +38,7 @@ public:
     void cpyHostToDevCublas();
     void cpyDevToHostCublas();
     void matrix_like(float number, Matrix &x);
+    void load_rand(float lower, float higher);
     size_t getX() const;
     size_t getY() const;
 

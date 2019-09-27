@@ -11,7 +11,9 @@
 #include "src/operations/prodmatvect.h"
 #include "src/RNN/RnnLayer.h"
 #include "src/utils/cudamath.h"
+#include <cmath>
 #include "src/operations/outputlayer.h"
+#include "src/RNN/RnnNetwork.h"
 #include <chrono>
 #include <iostream>
 
@@ -19,20 +21,40 @@
 #define N 7
 #define Neurons 6
 
-//istanze N = 5000, Neurons = 5000, un loop di backpropagation su python 600ms, con cuda 5 ms.
+//istanze N = 5000, Neurons = 5000, un loop di backpropagation su python 600ms, con cuda 5 ms.cx
 
 int main(void) {
 
-    Matrix x = Matrix(N, 1);
+    /*Matrix x = Matrix(N, 1);
     Matrix h_prev = Matrix(Neurons, 1);
     Matrix U = Matrix(Neurons, N);
     Matrix W = Matrix(Neurons, Neurons);
     Matrix V = Matrix(N, Neurons);
 
     Matrix diffh = Matrix(Neurons, 1);
-    Matrix dVproduct = Matrix(N, 1);
+    Matrix dVproduct = Matrix(N, 1);*/
 
-    x.allocate();
+
+    RnnNetwork rnn = RnnNetwork(N, Neurons);
+    Matrix U = rnn.getU();
+    Matrix W = rnn.getW();
+    Matrix V = rnn.getV();
+
+
+    U.cpyDevToHost();
+    W.cpyDevToHost();
+    V.cpyDevToHost();
+
+    printf("U: \n");
+    U.print_matrix();
+    printf("W: \n");
+    W.print_matrix();
+    printf("V: \n");
+    V.print_matrix();
+
+
+
+    /*x.allocate();
     h_prev.allocate();
     diffh.allocate();
     dVproduct.allocate();
@@ -91,7 +113,7 @@ int main(void) {
         }
     }
 
-    printf("X: \n");
+    /*printf("X: \n");
     x.print_matrix();
     printf("h_prev: \n");
     h_prev.print_matrix();
@@ -105,9 +127,9 @@ int main(void) {
     printf("diffh: \n");
     diffh.print_matrix();
     printf("dVProd: \n");
-    dVproduct.print_matrix();
+    dVproduct.print_matrix();*/
 
-    diffh.cpyHostToDev();
+    /*diffh.cpyHostToDev();
     dVproduct.cpyHostToDev();
 
     x.cpyHostToDev();
@@ -119,13 +141,11 @@ int main(void) {
     cublasHandle_t handle;
     CHECK_CUBLAS(cublasCreate(&handle));
 
-    auto t1 = std::chrono::high_resolution_clock::now();
     RnnLayer rnnlayer;
-    for(int i = 0; i < 1; i++){
-        rnnlayer = RnnLayer();
-        rnnlayer.forward(handle, x, h_prev, U, W, V);
-        rnnlayer.backward(handle, x, h_prev, U, W, V, diffh, dVproduct);
-    }
+    rnnlayer = RnnLayer();
+    auto t1 = std::chrono::high_resolution_clock::now();
+    rnnlayer.forward(handle, x, h_prev, U, W, V);
+    rnnlayer.backward(handle, x, h_prev, U, W, V, diffh, dVproduct);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
 
@@ -145,9 +165,9 @@ int main(void) {
     dW.cpyDevToHost();
     dV.cpyDevToHost();
     dU.cpyDevToHost();
-    dh_prev.cpyDevToHost();
+    dh_prev.cpyDevToHost();*/
 
-    printf("h: \n");
+    /*printf("h: \n");
     h.print_matrix();
     printf("output: \n");
     output.print_matrix();
@@ -160,8 +180,8 @@ int main(void) {
     printf("dU \n");
     dU.print_matrix();
     printf("dh_prev \n");
-    dh_prev.print_matrix();
-    cublasDestroy(handle);
+    dh_prev.print_matrix();*/
+    //cublasDestroy(handle);
     cudaDeviceReset();
     return 0;
 }

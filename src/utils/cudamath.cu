@@ -1,6 +1,9 @@
 //
 // Created by Fabio Lipreri on 2019-08-29.
 //
+
+#include <curand.h>
+#include <curand_kernel.h>
 #include "../utils/common.h"
 
 __global__ void add_vect(float *R, float *A, float *B, int x, int y){
@@ -81,4 +84,16 @@ __global__ void sigmoidBackward(float* dR, float* V, float *top_diff, int x, int
     int index = blockDim.x * blockIdx.x + threadIdx.x;
     if(index < x*y)
         dR[index] = sigmoid_derivate(V[index], top_diff[index]);
+}
+
+// http://ianfinlayson.net/class/cpsc425/notes/cuda-random
+__global__ void init_randoms(unsigned int seed, curandState_t* states) {
+    int index = blockDim.x * blockIdx.x + threadIdx.x;
+
+    curand_init(seed, index, 0, &states[index]);
+}
+
+__global__ void randoms(curandState_t* states, float* numbers, float lower, float higher) {
+    int index = blockDim.x * blockIdx.x + threadIdx.x;
+    numbers[index] = lower + (higher - lower) * curand_uniform(&states[index]);
 }

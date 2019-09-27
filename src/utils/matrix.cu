@@ -2,6 +2,9 @@
 // Created by Fabio Lipreri on 2019-05-14.
 //
 #include <iostream>
+#include <curand.h>
+#include <curand_kernel.h>
+#include "../utils/cudamath.h"
 #include "cublas_v2.h"
 #include "matrix.h"
 #include "common.h"
@@ -122,6 +125,18 @@ void Matrix::print_matrix() {
         printf("\n");
     }
     printf("\n");
+}
+
+void Matrix::load_rand(float lower, float higher) {
+    curandState_t* states;
+    int N = getX()*getY();
+    /* allocate space on the GPU for the random states */
+    cudaMalloc((void**) &states, N * sizeof(curandState_t));
+
+    dim3 TxB(BLOCK_SIZE);
+    dim3 num_blocks((N + TxB.x - 1) / TxB.x);
+    init_randoms<<<num_blocks, TxB>>>(time(0), states);
+    randoms<<<num_blocks, TxB>>>(states, getDevData().get(), lower, higher);
 }
 
 const std::shared_ptr<float> &Matrix::getHostData() const {
