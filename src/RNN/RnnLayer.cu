@@ -51,6 +51,7 @@ void RnnLayer::backward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix
     Vhproduct.backward(handle, dVproduct);
     this->dV = Vhproduct.getdMatrix();
     Matrix dhv = Vhproduct.getdVector();
+
     Matrix dh;
     dh.allocate_size(dhv.getX(), dhv.getY());
 
@@ -62,6 +63,8 @@ void RnnLayer::backward(cublasHandle_t handle, Matrix &x, Matrix &h_prev, Matrix
     Matrix dUwsum = ht.backward(dh);
     Matrix dUWproduct = UWsum.backward(dUwsum);
     Uproduct.backward(handle, dUWproduct);
+
+
     this->dx = Uproduct.getdVector();
     this->dU = Uproduct.getdMatrix();
     Wproduct.backward(handle, dUWproduct);
@@ -95,4 +98,42 @@ const Matrix &RnnLayer::getDW() const {
 
 const Matrix &RnnLayer::getDV() const {
     return dV;
+}
+
+const ProdMatVect &RnnLayer::getUproduct() const {
+    return Uproduct;
+}
+
+const ProdMatVect &RnnLayer::getWproduct() const {
+    return Wproduct;
+}
+
+const Add &RnnLayer::getUWsum() const {
+    return UWsum;
+}
+
+const Tanh &RnnLayer::getHt() const {
+    return ht;
+}
+
+const ProdMatVect &RnnLayer::getVhproduct() const {
+    return Vhproduct;
+}
+
+std::ostream& operator<<(std::ostream &strm, const RnnLayer &cell) {
+    cell.getH().cpyDevToHost();
+    strm << "h: " << cell.getH() << endl;
+    cell.getOutput().cpyDevToHost();
+    strm << "output: " << cell.getOutput() << endl;
+    cell.getDx().cpyDevToHost();
+    strm << "dx: " << cell.getDx()<< endl;
+    cell.getDhPrev().cpyDevToHost();
+    strm << "dh_prev: " << cell.getDhPrev() << endl;
+    cell.getDU().cpyDevToHost();
+    strm << "dU: " << cell.getDU() << endl;
+    cell.getDW().cpyDevToHost();
+    strm << "dW: " << cell.getDW() << endl;
+    cell.getDV().cpyDevToHost();
+    strm << "dV: " << cell.getDV() << endl;
+    return strm;
 }

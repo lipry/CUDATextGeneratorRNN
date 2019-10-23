@@ -25,7 +25,7 @@
 #include "../utils/common.h"
 #include "../utils/cudamath.h"
 
-void OutputLayer::predict(cublasHandle_t handle, Matrix &x){
+void OutputLayer::predict(cublasHandle_t handle, const Matrix &x){
     float sum = 0.0f;
     float alpha;
     int maxindex = -1;
@@ -43,7 +43,7 @@ void OutputLayer::predict(cublasHandle_t handle, Matrix &x){
     CHECK_CUBLAS(cublasSscal(handle, predictions.getX(), &alpha, predictions.getDevData().get(), 1))
 }
 
-float OutputLayer::loss(cublasHandle_t handle, Matrix &x, int y) {
+float OutputLayer::loss(cublasHandle_t handle, const Matrix &x, int y) {
     if(!predictions.isDevAlloc()){
        this->predict(handle, x);
        predictions.cpyDevToHost();
@@ -52,7 +52,7 @@ float OutputLayer::loss(cublasHandle_t handle, Matrix &x, int y) {
     return -1.0 * log(predictions[y]);
 }
 
-Matrix& OutputLayer::diff(cublasHandle_t handle, Matrix &x, int y){
+const Matrix& OutputLayer::diff(cublasHandle_t handle, const Matrix &x, int y){
     if(!predictions.isDevAlloc()){
         this->predict(handle, x);
         predictions.cpyDevToHost();

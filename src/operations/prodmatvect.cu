@@ -34,13 +34,13 @@ void ProdMatVect::backward(cublasHandle_t handle, Matrix &top_diff) {
 
     float alpha = 1.0f;
     float beta = 0.0f;
-
     //dv
     size_t m = M.getY();
     size_t n = M.getX();
     CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, m, n,
             &alpha, M.getDevData().get(), m, top_diff.getDevData().get(), 1, &beta, dv.getDevData().get(), 1));
 
+    //dM
     dim3 TxB(BLOCK_SIZE, BLOCK_SIZE);
     dim3 num_blocks(ceil(float(dM.getY())/TxB.x), ceil(float(dM.getX())/TxB.y));
     outerProduct<<<num_blocks, TxB>>>(dM.getDevData().get(), top_diff.getDevData().get(),

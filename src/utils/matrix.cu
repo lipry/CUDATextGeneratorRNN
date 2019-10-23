@@ -62,9 +62,21 @@ void Matrix::cpyHostToDev() {
     }
 }
 
-void Matrix::cpyDevToHost() {
+void Matrix::cpyDevToHost() const {
     if(dev_alloc && host_alloc)
         CHECK(cudaMemcpy(host_data.get(), dev_data.get(), x*y*sizeof(float), cudaMemcpyDeviceToHost));
+}
+
+void Matrix::oneHotEncoder(int index) {
+    if(getY() != 1){
+        throw std::invalid_argument("OneHotEncoder: One Hot Encoding must be performed only on vectors (not Matrix)");
+    }
+    if(index > this->getX() || index < 0){
+        throw std::invalid_argument("OneHotEncoder: index out of bounds");
+    }
+
+    memset(this->host_data.get(), 0, x*sizeof(float));
+    this->host_data.get()[index] = 1.0f;
 }
 
 void Matrix::cpyHostToDevCublas(){
@@ -104,11 +116,14 @@ size_t Matrix::getY() const {
     return y;
 }
 
-void Matrix::matrix_like(float number, Matrix &mat){
-    allocate_size(mat.getY(), mat.getX());
+void Matrix::load_value(float number){
     for(int i = 0; i<getX()*getY(); i++){
         this->host_data.get()[i] = number;
     }
+}
+
+void Matrix::init_with_zeroes(){
+    memset(this->host_data.get(), 0, x*sizeof(float));
 }
 
 bool Matrix::isVector(){
@@ -153,4 +168,15 @@ float& Matrix::operator[](const int index) {
 
 const float& Matrix::operator[](const int index) const {
     return host_data.get()[index];
+}
+
+std::ostream& operator<<(std::ostream &strm, const Matrix &m) {
+    // TODO: column-major
+    strm << "x = " << m.getX() << ", y = " << m.getY() << endl;
+    for(int i = 0; i < m.getX(); i++){
+        for(int j = 0; j < m.getY(); j++)
+            strm << to_string(m.getHostData().get()[i*m.getY()+j]) << " ";
+        strm << endl;
+    }
+    return strm << endl;
 }

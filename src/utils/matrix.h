@@ -6,6 +6,7 @@
 #define PROGETTOGPU_MATRIX_H
 
 #include <stdlib.h>
+#include <iostream>
 #include <memory>
 
 // Why use Shared pointer
@@ -34,10 +35,12 @@ public:
     bool isDevAlloc();
     bool isHostAlloc();
     void cpyHostToDev();
-    void cpyDevToHost();
+    void cpyDevToHost() const;
+    void oneHotEncoder(int index);
     void cpyHostToDevCublas();
     void cpyDevToHostCublas();
-    void matrix_like(float number, Matrix &x);
+    void load_value(float number);
+    void init_with_zeroes();
     void load_rand(float lower, float higher);
     size_t getX() const;
     size_t getY() const;
@@ -49,7 +52,10 @@ public:
 
     float& operator[](const int index);
     const float& operator[](const int index) const;
+
+
 };
 
+std::ostream& operator<<(std::ostream &strm, const Matrix &m);
 
 #endif //PROGETTOGPU_MATRIX_H

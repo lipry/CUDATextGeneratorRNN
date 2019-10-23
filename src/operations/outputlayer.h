@@ -13,9 +13,9 @@ class OutputLayer {
 private:
     Matrix predictions;
 public:
-    void predict(cublasHandle_t handle, Matrix &x);
-    float loss(cublasHandle_t handle, Matrix &x, int y);
-    Matrix& diff(cublasHandle_t handle, Matrix &x, int y);
+    void predict(cublasHandle_t handle, const Matrix &x);
+    float loss(cublasHandle_t handle, const Matrix &x, int y);
+    const Matrix & diff(cublasHandle_t handle, const Matrix &x, int y);
     const Matrix &getPredictions() const;
 };
 

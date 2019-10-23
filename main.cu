@@ -1,11 +1,8 @@
-#include "src/operations/sigmoid.h"
 #include "src/utils/matrix.h"
-
+#include "src/operations/sigmoid.h"
 #include "cublas_v2.h"
-
 #include "src/operations/hyperbolic_tan.h"
 #include <stdio.h>
-#include "src/utils/matrix.h"
 #include "src/operations/add.h"
 #include "src/utils/common.h"
 #include "src/operations/prodmatvect.h"
@@ -16,6 +13,7 @@
 #include "src/RNN/RnnNetwork.h"
 #include <chrono>
 #include <iostream>
+#include <vector>
 
 
 #define N 7
@@ -23,10 +21,11 @@
 
 //istanze N = 5000, Neurons = 5000, un loop di backpropagation su python 600ms, con cuda 5 ms.cx
 
-int main(void) {
-
-    /*Matrix x = Matrix(N, 1);
-    Matrix h_prev = Matrix(Neurons, 1);
+int main() {
+    cublasHandle_t handle;
+    CHECK_CUBLAS(cublasCreate(&handle));
+    //Matrix x = Matrix(N, 1);
+    /*Matrix h_prev = Matrix(Neurons, 1);
     Matrix U = Matrix(Neurons, N);
     Matrix W = Matrix(Neurons, Neurons);
     Matrix V = Matrix(N, Neurons);
@@ -34,9 +33,69 @@ int main(void) {
     Matrix diffh = Matrix(Neurons, 1);
     Matrix dVproduct = Matrix(N, 1);*/
 
+    /*x.allocate();
+    x.oneHotEncoder(2);
+    x.print_matrix();*/
 
+    /*Matrix M = Matrix(4, 3);
+    M.allocate();
+    int count = 1;
+    for(int r = 0; r<4; r++){
+        for(int c = 0; c<3; c++){
+            M[r*3+c] = count;
+            count++;
+        }
+    }
+    M.cpyHostToDev();
+    M.print_matrix();
+
+
+
+    Matrix dz = Matrix(3, 1);
+    dz.allocate();
+    dz[0] = 1;
+    dz[1] = 2;
+    dz[2] = 3;
+    dz[3] = 4;
+    dz.cpyHostToDev();*/
+
+    //float alpha = 1.0f;
+    //float beta = 0.0f;
+
+    /*size_t m = M.getY();
+    size_t n = M.getX();
+    CHECK_CUBLAS(cublasSgemv(handle, CUBLAS_OP_N, m, n,
+                             &alpha, M.getDevData().get(), m, x.getDevData().get(), 1, &beta, out.getDevData().get(), 1));*/
+
+    /*ProdMatVect prd = ProdMatVect();
+    Matrix mul = prd.forward(handle, M, x);
+    prd.backward(handle, dz);
+
+    Matrix D = prd.getdMatrix();
+    Matrix v = prd.getdVector();
+
+    mul.cpyDevToHost();
+    cout << "Mul: " << mul << endl;
+
+
+    D.cpyDevToHost();
+    printf("D: \n");
+    D.print_matrix();
+
+    v.cpyDevToHost();
+    printf("v: \n");
+    v.print_matrix();*/
+    std::vector<int> v{ 2, 3, 2, 3, 4, 5, 6, 6, 6};
+    std::vector<int> y{ 1, 2, 3, 4, 5, 6, 6, 6, 6};
     RnnNetwork rnn = RnnNetwork(N, Neurons);
-    Matrix U = rnn.getU();
+    //const vector<RnnLayer> &layers = rnn.forward_prop(handle, v);
+    rnn.backprop_through_time(handle, v, y, 3);
+
+    //for(int i = 0; i < layers.size(); i++){
+    //    cout << layers[i] << endl;
+    //}
+
+    /*Matrix U = rnn.getU();
     Matrix W = rnn.getW();
     Matrix V = rnn.getV();
 
@@ -50,21 +109,23 @@ int main(void) {
     printf("W: \n");
     W.print_matrix();
     printf("V: \n");
-    V.print_matrix();
+    V.print_matrix();*/
 
 
 
-    /*x.allocate();
-    h_prev.allocate();
+    //x.allocate();
+
+    /*h_prev.allocate();
     diffh.allocate();
-    dVproduct.allocate();
+    dVproduct.allocate();*/
 
-    for(int i = 0; i < N; i++){
-        x[i] = 0;
+    /*for(int i = 0; i < N; i++){
+        x[i] = 0.0;
     }
-    x[2] = 1;
+    x[2] = 1.0;
+    cout << x;*/
 
-    for(int i = 0; i < Neurons; i++){
+    /*for(int i = 0; i < Neurons; i++){
         diffh[i] = i+1;
     }
 
@@ -138,8 +199,7 @@ int main(void) {
     W.cpyHostToDev();
     V.cpyHostToDev();
 
-    cublasHandle_t handle;
-    CHECK_CUBLAS(cublasCreate(&handle));
+
 
     RnnLayer rnnlayer;
     rnnlayer = RnnLayer();
@@ -181,7 +241,7 @@ int main(void) {
     dU.print_matrix();
     printf("dh_prev \n");
     dh_prev.print_matrix();*/
-    //cublasDestroy(handle);
+    cublasDestroy(handle);
     cudaDeviceReset();
     return 0;
 }
