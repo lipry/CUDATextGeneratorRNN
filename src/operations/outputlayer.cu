@@ -58,6 +58,7 @@ const Matrix& OutputLayer::diff(cublasHandle_t handle, const Matrix &x, int y){
         predictions.cpyDevToHost();
     }
     predictions[y] -= 1;
+    predictions.cpyHostToDev();
     return predictions;
 }
 

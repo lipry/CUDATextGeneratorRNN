@@ -153,7 +153,7 @@ void RnnNetwork::backprop_through_time(cublasHandle_t handle, const std::vector<
         v.oneHotEncoder(x[t]);
         v.cpyHostToDev();
 
-        diff_Vprod.cpyDevToHost();
+        //diff_Vprod.cpyDevToHost();
         cout << "diff_VProd" << endl;
         cout << diff_Vprod << endl;
 
